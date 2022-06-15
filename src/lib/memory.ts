@@ -2,7 +2,6 @@ export interface Memory {
     name: String,
     age: Number,
     traits: String,
-    code: String,
 }
 
 /**

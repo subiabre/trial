@@ -65,12 +65,12 @@
             action: async () => {
                 memory = await createMemory();
                 log = createLogs();
-                log = updateLogs(log, "", `Invited ${memory.name}.`);
+                log = updateLogs(log, "", `Invited a new memory.`);
 
                 log = updateLogs(
                     log,
                     "",
-                    `Age: ${memory.age}. Code: ${memory.code}.`
+                    `Name: ${memory.name}. Age: ${memory.age}.`
                 );
 
                 log = updateLogs(
