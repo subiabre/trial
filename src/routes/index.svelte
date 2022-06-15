@@ -242,6 +242,10 @@
         animation: flicker-5 0.6s linear both;
     }
 
+    #app p.cli {
+        line-break: anywhere;
+    }
+
     #app .cli span {
         content: var(--code-data);
         color: var(--font-color-dark);
