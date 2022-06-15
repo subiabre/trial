@@ -98,7 +98,7 @@
 
                 let res = await sayToMemory(messages, { 
                     prompt: { memory, login },
-                    completion: { stop: [`${login}:`] } 
+                    completion: { stop: [`${login}:`], temperature: memory.temperature } 
                 });
 
                 res.map((/** @type {string} */ msg) => {

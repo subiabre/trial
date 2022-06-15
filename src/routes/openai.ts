@@ -19,7 +19,7 @@ function makePrompt(messages: Log[], options: PromptOptions) {
         `${options.memory.name} is ${options.memory.age} years old and is ${options.memory.traits}.\n\n`,
         ...messages
             .map((msg) => `${msg.user}: ${msg.text}\n`)
-            .slice(-64),
+            .slice(options.memory.logrange),
         `${options.memory.name}:`,
     ];
 }

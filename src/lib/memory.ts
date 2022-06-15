@@ -2,16 +2,18 @@ import type { CompletionOptions, PromptOptions } from "src/routes/openai";
 import type { Log } from "./logs";
 
 export interface Memory {
-    name: String,
-    age: Number,
-    traits: String,
+    name: string,
+    age: number,
+    traits: string,
+    logrange: number,
+    temperature: number
 }
 
 /**
  * @return {Memory}
  */
 export function emptyMemory() {
-    return { name: '', age: 0, traits: '' }
+    return { name: '', age: 0, traits: '', logrange: -8, temperature: 0.7 }
 }
 
 export async function createMemory() {
