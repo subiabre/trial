@@ -1,22 +1,32 @@
-import { Configuration, OpenAIApi } from "openai";
+async function openai(prompt: any, max: any, stop: [String]) {
+    const completion = await fetch('https://api.goose.ai/v1/engines/gpt-j-6b/completions', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+            "prompt": prompt,
+            "max_tokens": max,
+            "stop": stop,
+            "temperature": 0.9,
+            "frequency_penalty": 0.1,
+            "logit_bias": {"50256": -100,"198":  0.5},
+        })
+    });
 
-const config = new Configuration({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
-const openai = new OpenAIApi(config);
+    const data = await completion.json();
+
+    return data;
+}
 
 /** @type {import('./__types/openai').RequestHandler} */
 export async function post(event: { request: { json: () => any; }; }) {
     const data = await event.request.json();
-    const completion = await openai.createCompletion({
-        model: "text-davinci-002",
-        prompt: data.log,
-        temperature: 0.99,
-      });
-    const answer = completion.data.choices[0].text;
-
-    console.log(data.log);
-    console.log(completion.data.choices);
+    const prompt = data.messages.join("");
+    const answer = await openai(prompt, 128, data.end);
 
     return { 
-        body: { data: answer }
+        body: { prompt, answer }
     };
 }
