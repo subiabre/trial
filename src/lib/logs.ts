@@ -1,6 +1,6 @@
 export interface Log {
-    user: String,
-    text: String
+    user: string,
+    text: string
 }
 
 /**
@@ -16,6 +16,6 @@ export function createLogs(): Log[] {
  * @param text 
  * @returns {Log[]}
  */
-export function updateLogs(logs: Log[], user: String, text: String): Log[] {
+export function updateLogs(logs: Log[], user: string, text: string): Log[] {
     return [...logs, { user, text }];
 }
