@@ -1,3 +1,6 @@
+import type { CompletionOptions, PromptOptions } from "src/routes/openai";
+import type { Log } from "./logs";
+
 export interface Memory {
     name: String,
     age: Number,
@@ -21,23 +24,14 @@ export async function createMemory() {
     return json;
 }
 
-export async function sayToMemory(data: { messages: String[], end: String[] }) {
+export async function sayToMemory(messages: Log[], options: { prompt: PromptOptions, completion?: CompletionOptions }) {
     const res = await fetch('/openai', {
         method: 'POST',
         headers: { "Content-Type": "application.json" },
-        body: JSON.stringify({ ...data, end: data.end.map(end => `${end}:`) })
+        body: JSON.stringify({ messages, options })
     });
+
     const json = await res.json();
 
-    console.log(json);
-
     return json.answer;
-}
-
-export function parseMemoryAnswer(answer: any) {
-    const choice = answer.choices[0];
-
-    if (choice.finish_reason === 'length') return `${choice.text}...`
-
-    return choice.text;
 }

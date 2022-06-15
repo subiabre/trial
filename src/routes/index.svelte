@@ -2,7 +2,7 @@
     // @ts-ignore
     import { createLogs, updateLogs } from "$lib/logs";
     // @ts-ignore
-    import { emptyMemory, createMemory, sayToMemory, parseMemoryAnswer } from "$lib/memory";
+    import { emptyMemory, createMemory, sayToMemory } from "$lib/memory";
     // @ts-ignore
     import { createCommandList, getCommandFromList } from "$lib/commands";
     import { afterUpdate, beforeUpdate } from "svelte";
@@ -96,30 +96,14 @@
 
                 messages = updateLogs(messages, login, args.join(" "));
 
-                let res = await sayToMemory({
-                    messages: [
-                        `The following is a conversation with ${memory.name}. ${memory.name} is ${memory.age} years old and is ${memory.traits}.\n\n`,
-                        ...messages
-                            .map(
-                                (
-                                    /** @type {{ user: any; text: any; }} */ msg
-                                ) => `${msg.user}: ${msg.text}\n`
-                            )
-                            .slice(-64),
-                        `${memory.name}: `,
-                    ],
-                    end: [login],
+                let res = await sayToMemory(messages, { 
+                    prompt: { memory, login },
+                    completion: { stop: [`${login}:`] } 
                 });
 
-                let answer = parseMemoryAnswer(res);
-
-                answer.split(`\n`).map((/** @type {string} */ msg) => {
-                    let text = msg.replace(/\w{1,}:/, "");
-
-                    if (text.length > 0 && !(new RegExp(`^${login}`).test(text))) {
-                        log = updateLogs(log, memory.name, text);
-                        messages = updateLogs(messages, memory.name, text.trim());
-                    }
+                res.map((/** @type {string} */ msg) => {
+                    log = updateLogs(log, memory.name, msg);
+                    messages = updateLogs(messages, memory.name, msg);
                 });
             },
         },
@@ -137,6 +121,7 @@
                     return;
                 }
 
+                // @ts-ignore
                 let text = args[0] === 'traits' ? `My traits are ${memory.traits}` : `My ${args[0]} is ${memory[args[0]]}`;
                 
                 log = updateLogs(log, memory.name, text);
@@ -160,7 +145,7 @@
         },
         {
             name: "clear",
-            help: "Clears the shell",
+            help: "Clears the shell of messages.",
             action: () => (log = createLogs()),
         },
         {
