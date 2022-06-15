@@ -2,6 +2,11 @@ import type { CompletionOptions, PromptOptions } from "src/routes/openai";
 import type { Log } from "./logs";
 
 export interface Memory {
+    code: string,
+    data: MemoryData
+}
+
+export interface MemoryData {
     name: string,
     age: number,
     traits: string,
@@ -13,13 +18,23 @@ export interface Memory {
  * @return {Memory}
  */
 export function emptyMemory() {
-    return { name: '', age: 0, traits: '', logrange: -8, temperature: 0.7 }
+    return {
+        code: '',
+        data: {
+            name: '',
+            age: 0,
+            traits: '',
+            logrange: -8,
+            temperature: 0.7
+        }
+    }
 }
 
-export async function createMemory() {
+export async function createMemory(code?: string) {
     const res = await fetch('/generate', {
-        method: 'GET',
+        method: 'POST',
         headers: { "Content-Type": "application-json" },
+        body: JSON.stringify({ code: code ?? '' })
     });
     const json = await res.json();
 

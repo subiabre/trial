@@ -23,6 +23,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"jose": "^4.8.1",
 		"openai": "^3.0.0"
 	},
 	"engines": {

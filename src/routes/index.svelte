@@ -62,15 +62,17 @@
         {
             name: "invite",
             help: "Loads a new digital memory into the shell.",
-            action: async () => {
-                memory = await createMemory();
+            /** @param {string[]} args*/
+            action: async (args) => {
+                memory = await createMemory(args[0]);
+
                 log = createLogs();
                 log = updateLogs(log, "", `Invited a new memory.`);
 
                 log = updateLogs(
                     log,
                     "",
-                    `Name: ${memory.name}. Age: ${memory.age}.`
+                    `Name: ${memory.data.name}. Age: ${memory.data.age}.`
                 );
 
                 log = updateLogs(
@@ -85,25 +87,18 @@
             help: "Sends a message to the digital memory.",
             /** @param {string[]} args */
             action: async (args) => {
-                if (memory.name === "") {
-                    log = updateLogs(
-                        log,
-                        "",
-                        `There is currently no digital memory loaded. Type 'invite' to bring one.`
-                    );
-                    return;
-                }
+                if (!checkForLoadedMemory()) return;
 
                 messages = updateLogs(messages, login, args.join(" "));
 
                 let res = await sayToMemory(messages, { 
-                    prompt: { memory, login },
-                    completion: { stop: [`${login}:`], temperature: memory.temperature } 
+                    prompt: { memory: memory.data, login },
+                    completion: { stop: [`${login}:`], temperature: memory.data.temperature } 
                 });
 
                 res.map((/** @type {string} */ msg) => {
-                    log = updateLogs(log, memory.name, msg);
-                    messages = updateLogs(messages, memory.name, msg);
+                    log = updateLogs(log, memory.data.name, msg);
+                    messages = updateLogs(messages, memory.data.name, msg);
                 });
             },
         },
@@ -112,20 +107,26 @@
             help: "Use it to get a digital memory to state on of their facts. 'force <fact>'",
             /** @param {string[]} args */
             action: (args) => {
-                if (memory.name === "") {
-                    log = updateLogs(
-                        log,
-                        "",
-                        `There is currently no digital memory loaded. Type 'invite' to bring one.`
-                    );
-                    return;
-                }
+                if (!checkForLoadedMemory()) return;
 
                 // @ts-ignore
-                let text = args[0] === 'traits' ? `My traits are ${memory.traits}` : `My ${args[0]} is ${memory[args[0]]}`;
+                let text = args[0] === 'traits' ? `My traits are ${memory.data.traits}` : `My ${args[0]} is ${memory.data[args[0]]}`;
                 
-                log = updateLogs(log, memory.name, text);
-                messages = updateLogs(messages, memory.name, text);
+                log = updateLogs(log, memory.data.name, text);
+                messages = updateLogs(messages, memory.data.name, text);
+            }
+        },
+        {
+            name: "brief",
+            help: "Get a brief on the personality of the digital memory",
+            /** @param {string[]} args */
+            action: (args) => {
+                if (!checkForLoadedMemory()) return;
+
+                log = updateLogs(log, "", `Name: ${memory.data.name}`);
+                log = updateLogs(log, "", `Age: ${memory.data.age}`);
+                log = updateLogs(log, "", `Personality: ${memory.data.traits.split(', ')[0]}`);
+                log = updateLogs(log, "", `Code: ${memory.code}`);
             }
         },
         {
@@ -136,7 +137,7 @@
                 log = updateLogs(
                     log,
                     "",
-                    `${memory.name} was removed from the repository.`
+                    `${memory.data.name} was removed from the repository.`
                 );
 
                 memory = emptyMemory();
@@ -179,6 +180,20 @@
         command.action(args.slice(1));
 
         input = "";
+    }
+
+    function checkForLoadedMemory() {
+        if (memory.code === "") {
+            log = updateLogs(
+                log,
+                "",
+                `There is currently no digital memory loaded. Type 'invite' to bring one.`
+            );
+
+            return false;
+        }
+
+        return true;
     }
 </script>
 

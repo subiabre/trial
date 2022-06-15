@@ -1,5 +1,5 @@
 import type { Log } from "$lib/logs";
-import type { Memory } from "$lib/memory";
+import type { MemoryData } from "$lib/memory";
 
 export interface CompletionOptions {
     max?: number,
@@ -9,7 +9,7 @@ export interface CompletionOptions {
 }
 
 export interface PromptOptions {
-    memory: Memory,
+    memory: MemoryData,
     login: string
 }
 
@@ -65,7 +65,7 @@ function parseOpenAiCompletion(completion: any, stop: string[]) {
 }
 
 /** @type {import('./__types/makeCompletion').RequestHandler} */
-export async function post(event: { request: { json: () => any; }; }) {
+export async function post(event: { request: { json: () => any } }) {
     const data = await event.request.json();
     const prompt = makePrompt(data.messages, data.options.prompt);
 
