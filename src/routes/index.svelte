@@ -1,140 +1,233 @@
 <script>
-import { afterUpdate, beforeUpdate } from "svelte";
+    // @ts-ignore
+    import { createLogs, updateLogs } from "$lib/logs";
+    // @ts-ignore
+    import { emptyMemory, createMemory, sayToMemory, parseMemoryAnswer } from "$lib/memory";
+    // @ts-ignore
+    import { createCommandList, getCommandFromList } from "$lib/commands";
+    import { afterUpdate, beforeUpdate } from "svelte";
 
-
-
+    /** @type {HTMLDivElement} */
     let div;
+    /** @type {boolean} */
     let autoscroll;
     let input = "";
+    let login = "Engineer";
 
-    /** @type {{name: String, age: Number, traits: String}} */
-    let memory = { name: '', age: 0, traits: '' };
+    let memory = emptyMemory();
 
-    /** @type {{user: String, text: String}[]} */
-    let log = [];
+    let messages = createLogs();
+    let log = createLogs();
+
+    let commands = createCommandList([
+        {
+            name: "help",
+            help: "Shows help about commands.",
+            /** @param {string[]} args */
+            action: (args) => {
+                if (args.length < 1) {
+                    // @ts-ignore
+                    log = updateLogs(
+                        log,
+                        "",
+                        `commands: ${commands
+                            .map(
+                                (/** @type {{ name: any; }} */ cmd) => cmd.name
+                            )
+                            .join(", ")}`
+                    );
+                    log = updateLogs(
+                        log,
+                        "",
+                        "Type help <command> to get help on a given command."
+                    );
+
+                    return;
+                }
+
+                const command = getCommandFromList(commands, args[0]);
+                log = updateLogs(log, "", command.help);
+            },
+        },
+        {
+            name: "name",
+            help: "Changes your conversational name. This is the name memories will read about you.",
+            /** @param {string[]} args */
+            action: (args) => {
+                login = args[0];
+
+                log = updateLogs(log, "", `Name set to ${login}`);
+            },
+        },
+        {
+            name: "invite",
+            help: "Loads a new digital memory into the shell.",
+            action: async () => {
+                memory = await createMemory();
+                log = createLogs();
+                log = updateLogs(log, "", `Invited ${memory.name}.`);
+
+                log = updateLogs(
+                    log,
+                    "",
+                    `Age: ${memory.age}. Code: ${memory.code}.`
+                );
+
+                log = updateLogs(
+                    log,
+                    "",
+                    `Type 'say <message>' to talk to this memory.`
+                );
+            },
+        },
+        {
+            name: "say",
+            help: "Sends a message to the digital memory.",
+            /** @param {string[]} args */
+            action: async (args) => {
+                if (memory.name === "") {
+                    log = updateLogs(
+                        log,
+                        "",
+                        `There is currently no digital memory loaded. Type 'invite' to bring one.`
+                    );
+                    return;
+                }
+
+                messages = updateLogs(messages, login, args.join(" "));
+
+                let res = await sayToMemory({
+                    messages: [
+                        `The following is a conversation with ${memory.name}. ${memory.name} is ${memory.age} years old and is ${memory.traits}.\n\n`,
+                        ...messages
+                            .map(
+                                (
+                                    /** @type {{ user: any; text: any; }} */ msg
+                                ) => `${msg.user}: ${msg.text}\n`
+                            )
+                            .slice(-64),
+                        `${memory.name}: `,
+                    ],
+                    end: [login],
+                });
+
+                let answer = parseMemoryAnswer(res);
+
+                answer.split(`\n`).map((/** @type {string} */ msg) => {
+                    let text = msg.replace(/\w{1,}:/, "");
+
+                    if (text.length > 0 && !(new RegExp(`^${login}`).test(text))) {
+                        log = updateLogs(log, memory.name, text);
+                        messages = updateLogs(messages, memory.name, text.trim());
+                    }
+                });
+            },
+        },
+        {
+            name: "force",
+            help: "Use it to get a digital memory to state on of their facts. 'force <fact>'",
+            /** @param {string[]} args */
+            action: (args) => {
+                if (memory.name === "") {
+                    log = updateLogs(
+                        log,
+                        "",
+                        `There is currently no digital memory loaded. Type 'invite' to bring one.`
+                    );
+                    return;
+                }
+
+                let text = args[0] === 'traits' ? `My traits are ${memory.traits}` : `My ${args[0]} is ${memory[args[0]]}`;
+                
+                log = updateLogs(log, memory.name, text);
+                messages = updateLogs(messages, memory.name, text);
+            }
+        },
+        {
+            name: "remove",
+            help: "Removes the currently loaded digital memory from the repository. This action is not reversible.",
+            action: () => {
+                log = createLogs();
+                log = updateLogs(
+                    log,
+                    "",
+                    `${memory.name} was removed from the repository.`
+                );
+
+                memory = emptyMemory();
+                messages = createLogs();
+            },
+        },
+        {
+            name: "clear",
+            help: "Clears the shell",
+            action: () => (log = createLogs()),
+        },
+        {
+            name: "",
+            help: "",
+            action: () =>
+                (log = updateLogs(log, "", `Could not parse command.`)),
+        },
+    ]);
 
     beforeUpdate(() => {
-		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
-	});
+        autoscroll =
+            div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20;
+    });
 
-	afterUpdate(() => {
-		if (autoscroll) div.scrollTo(0, div.scrollHeight);
-	});
+    afterUpdate(() => {
+        if (autoscroll) div.scrollTo(0, div.scrollHeight);
+    });
 
     /**
      * @param {Event} event
      */
-    async function handleSubmit(event)
-    {
+    async function handleSubmit(event) {
         event.preventDefault();
-        
-        updateLog('user', input);
-        
-        let command = input.split(' ')[0];
+
+        log = updateLogs(log, login, input);
+
+        let args = input.split(" ");
+        let command = getCommandFromList(commands, args[0]);
+
+        command.action(args.slice(1));
+
         input = "";
-        
-        switch (command) {
-            case 'help':
-                updateLog('', 'commands: help, invite, say, clear.');
-                break;
-            case 'invite':
-                memory = await getMemoryData();
-                updateLog('', `Invited ${memory.name}. Age: ${memory.age}. Use 'say' to talk to this memory.`);
-                break;
-            case 'say':
-                let text = memory.name !== '' ? await memoryAnswer() : `Type 'invite' to load a memory into the shell.`;
-                updateLog(memory.name, text);
-                break;
-            case 'kill':
-                memory = { name: '', age: 0, traits: '' }
-                updateLog('', `The memory was removed from the repository.`)
-                break;
-            case 'clear':
-                clearLog();
-                break;
-            default:
-                updateLog('', `${command} is not a valid command.`)
-                break;
-        }
     }
-
-    /** 
-     * @param {String} user
-     * @param {String} text
-     */
-    function updateLog(user, text) {
-        log = [...log, { user, text}];
-    }
-
-    function clearLog()
-    {
-        log = [];
-    }
-
-    async function memoryAnswer() {
-        let data = bundleLog()
-            .map((msg) => msg.text.split(' ')[0] === 'say' || msg.user === memory.name ? `${msg.user}: ${msg.text.split(' ').slice(1).join(' ')}` : '')
-            .join("\n");
-
-        let answer = await getMemoryAnswer(data);
-
-        return answer;
-    }
-
-    function bundleLog()
-    {
-        return [
-            {
-                user: '',
-                text: `say The following is a conversation between a human user and ${memory.name}, a person of ${memory.age} years of age whose memory was preserved digitally and is ${memory.traits}.`
-            },
-            ...log.slice(-100),
-            { user: `${memory.name}`, text: '' }
-        ];
-    }
-
-    /** @param {String} data */
-    async function getMemoryAnswer(data) {
-        const res = await fetch('/openai', {
-            method: 'POST',
-            headers: { "Content-Type": "application.json" },
-            body: JSON.stringify({ log: data })
-        });
-        const json = await res.json();
-
-        return json.data;
-    }
-
-    async function getMemoryData() {
-        const res = await fetch('/generate', {
-            method: 'GET',
-            headers: { "Content-Type": "application-json" },
-        });
-        const json = await res.json();
-    
-        return json.data;
-    }
-
 </script>
 
 <div id="app" bind:this={div}>
     <p>Copyright AMALGAMATE INDUSTRIES. ALL RIGTHS RESERVED.</p>
-    <br/>
-    <p>Welcome to AMALGAMATE System Shell v1.1 for the AMALGAMATE Digital Memory Repository.</p>
+    <br />
+    <p>
+        Welcome to AMALGAMATE System Shell v1.1 for the AMALGAMATE Digital
+        Memory Repository.
+    </p>
     <p>Type 'help' for a list of commands.</p>
-    <br/>
+    <br />
 
     {#each log as msg}
-        <p class="cli">{#if msg.user !== ''}
-            <span>{msg.user}@local: </span>
-        {/if}{msg.text}</p>
+        <p class="cli">
+            {#if msg.user !== ""}
+                <span>{msg.user}@local: </span>
+            {/if}{msg.text}
+        </p>
     {/each}
 
     <!-- svelte-ignore a11y-autofocus -->
-    <form class="cli" on:submit="{handleSubmit}"><span>user@local: </span><input autofocus name="input" bind:value="{input}"/></form>
+    <form class="cli" autocomplete="off" on:submit={handleSubmit}>
+        <span>{login}@local: </span><input
+            autofocus
+            name="input"
+            bind:value={input}
+        />
+    </form>
 </div>
 
 <style>
+    @import "$lib/assets/keyframes.css";
+
     :root {
         --background-color: #030303;
         --font-color-main: #fca026;
@@ -148,20 +241,20 @@ import { afterUpdate, beforeUpdate } from "svelte";
 
     #app {
         max-width: 800px;
-        height: 100vh;
+        height: calc(100vh - 2em);
         margin: 0 auto;
-        padding: 0 1em;
-        font-family: 'Courier New', Courier, monospace;
+        padding: 1em;
+        font-family: "Courier New", Courier, monospace;
         color: var(--font-color-main);
         overflow-y: auto;
     }
 
     #app * {
-        text-shadow: 0px 0px 1em var(--font-color-main);
-    }
-
-    #app p {
         margin: 0;
+        -webkit-animation: text-shadow-drop-center 1s infinite both;
+        animation: text-shadow-drop-center 1s infinite both;
+        -webkit-animation: flicker-5 0.6s linear both;
+        animation: flicker-5 0.6s linear both;
     }
 
     #app .cli span {
@@ -173,7 +266,7 @@ import { afterUpdate, beforeUpdate } from "svelte";
         width: calc(100% - 11rem);
         padding: 0;
         font-size: 1rem;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: "Courier New", Courier, monospace;
         color: var(--font-color-main);
         border: none;
         outline: none;
