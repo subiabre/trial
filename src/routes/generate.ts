@@ -26,8 +26,8 @@ export async function get() {
             name: randomElementsFromArray(names, 1)[0],
             age: randomIntBetween(6, 101),
             traits: randomTraits().join(", "),
-            logrange: randomIntBetween(-32, -8),
-            temperature: randomIntBetween(4, 8) * 0.11
+            logrange: randomIntBetween(-16, -8),
+            temperature: randomIntBetween(2, 8) * 0.11
         }
     };
 }
