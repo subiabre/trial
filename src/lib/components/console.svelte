@@ -178,10 +178,10 @@
                 if (!checkForLoggedIn()) return;
                 if (!checkForLoadedMemory()) return;
 
+                output = updateLogs(output, "", `Subject ${memory.code}`);
                 output = updateLogs(output, "", `Name: ${memory.data.name}`);
                 output = updateLogs(output, "", `Age: ${memory.data.age}`);
-                output = updateLogs(output, "", `Personality: ${memory.data.traits.split(', ')[0]}`);
-                output = updateLogs(output, "", `Code: ${memory.code}`);
+                output = updateLogs(output, "", `Personal remarks: ${memory.data.traits.split(', ')[0]}`);
             }
         },
         {

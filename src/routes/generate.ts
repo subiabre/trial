@@ -1,7 +1,9 @@
 import { names } from "$lib/data/names.json";
 import { traits } from "$lib/data/traits.json";
-import type { Memory, MemoryData } from "$lib/memory";
-import * as jose from "jose";
+import type { MemoryData } from "$lib/memory";
+import { encodeBase32, decodeBase32 } from "simple-base32";
+
+const codePrefix = '_';
 
 function randomIntBetween(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -22,16 +24,24 @@ function randomTraits() {
 }
 
 function createCode(data: MemoryData) {
-    return new jose.UnsecuredJWT({ data })
-        .setIssuedAt()
-        .encode()
+    return `${encodeBase32(data.name)}` +
+        `${codePrefix}${encodeBase32(data.age.toString())}` +
+        `${codePrefix}${encodeBase32(data.traits)}` +
+        `${codePrefix}${data.logrange * -1}` +
+        `${codePrefix}${data.temperature * 100}`
         ;
 }
 
 function readCode(code: string) {
-    const data = jose.UnsecuredJWT.decode(code).payload;
+    const params = code.split(codePrefix);
 
-    return data.data;
+    return {
+        name: decodeBase32(params[0]),
+        age: decodeBase32(params[1]),
+        traits: decodeBase32(params[2]),
+        logrange: ~~params[3] * -1,
+        temperature: ~~params[4] / 100
+    }
 }
 
 /** @type {import('./__types/generate').RequestHandler} */
