@@ -4,10 +4,11 @@ export interface Log {
 }
 
 /**
+ * @param {Log[]} log
  * @returns {Log[]}
  */
-export function createLogs(): Log[] {
-    return [];
+export function createLogs(logs?: Log[]): Log[] {
+    return [...logs ?? []];
 }
 
 /**
