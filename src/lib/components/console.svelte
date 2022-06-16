@@ -270,11 +270,13 @@
 
 <style>
     @import "$lib/assets/keyframes.css";
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
     :root {
         --background-color: #030303;
         --font-color-main: #fca026;
         --font-color-dark: #d16119;
+        --font-color-glow: #fca02633;
     }
 
     :global(body) {
@@ -283,26 +285,41 @@
     }
 
     #console {
-        max-width: 800px;
         height: calc(100vh - 2em);
-        margin: 0 auto;
         padding: 1em;
-        font-family: "Courier New", Courier, monospace;
         color: var(--font-color-main);
         overflow-y: auto;
+        -webkit-animation: neon 2s infinite alternate both;
+                animation: neon 2s infinite alternate both;
+    }
+
+    #console::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px
+        );
     }
 
     #console * {
         margin: 0;
-        -webkit-animation: text-shadow-drop-center 1s infinite both;
-        animation: text-shadow-drop-center 1s infinite both;
-        -webkit-animation: flicker-5 0.6s linear both;
-        animation: flicker-5 0.6s linear both;
+        font-family: 'VT323', monospace;
     }
 
     #console p.cli {
         min-height: 1rem;
         word-wrap: break-word;
+        -webkit-animation: flicker-5 0.6s linear both;
+                animation: flicker-5 0.6s linear both;
     }
 
     #console .cli span {
@@ -314,10 +331,11 @@
         width: calc(100% - 11rem);
         padding: 0;
         font-size: 1rem;
-        font-family: "Courier New", Courier, monospace;
         color: var(--font-color-main);
         border: none;
         outline: none;
         background-color: transparent;
+        -webkit-animation: neon 4s infinite alternate both;
+                animation: neon 4s infinite alternate both;
     }
 </style>
