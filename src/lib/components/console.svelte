@@ -24,14 +24,26 @@
 
     let dialog = createLogs();
     let output = createLogs();
-    let logs = createLogs();
-
+    
+    let log = { user: '', text: '' }
+    let logs = createLogs([log]);
+    
+    let defaultCommand = "";
     let commands = createCommandList([
         {
             name: "",
-            help: [],
+            help: messages.commands.empty,
             /** @param {string[]} args */
-            action: (args) => (output = updateLogs(output, "", `${args[0]} is not a valid command.`)),
+            action: (args) => {
+                if (defaultCommand === "") {
+                    output = updateLogs(output, "", `${args[0]} is not a valid command.`);
+                    return;
+                }
+
+                const {command} = getCommandFromList(commands, [defaultCommand]);
+
+                command.action(args);
+            },
         },
         {
             name: "help",
@@ -40,7 +52,7 @@
             action: (args) => {
                 if (args.length < 1) {
                     let list = loggedin 
-                        ? commands.map((/** @type {{ name: any; }} */ cmd) => cmd.name).join(", ")
+                        ? commands.slice(1).map((/** @type {{ name: any; }} */ cmd) => cmd.name).join(", ")
                         : `login`
                         ;
 
@@ -57,12 +69,20 @@
             },
         },
         {
+            name: "default",
+            help: messages.commands.default,
+            /** @param {string[]} args */
+            action: (args) => {
+                defaultCommand = args[0];
+            }
+        },
+        {
             name: "login",
             help: messages.commands.login,
             action: async () => {
                 loggedin = true;
 
-                await new Promise((res, rej) => setTimeout(res, 600));
+                await new Promise((res) => setTimeout(res, 600));
 
                 login = "Engineer";
                 output = updateLogs(output, '', `System Shell for the AMALGAMATE Digital Memory Repository.`);
@@ -70,7 +90,7 @@
                 output = updateLogs(output, '', `Type 'help' for a list of commands.`);
                 output = updateLogs(output, '', ``);
 
-                await new Promise((res, rej) => setTimeout(res, 2250));
+                await new Promise((res) => setTimeout(res, 1250));
 
                 messages.welcome.map((/** @type {string} */ msg) => {
                     output = updateLogs(output, '', msg);
@@ -97,6 +117,7 @@
 
                 memory = await createMemory(args[0]);
 
+                dialog = createLogs();
                 output = createLogs();
                 output = updateLogs(output, "", `Invited a new memory.`);
 
@@ -204,7 +225,7 @@
         event.preventDefault();
 
         output = updateLogs(output, login, input);
-        logs = updateLogs(logs, '', input);
+        logs = updateLogs(logs, new Date().toISOString(), input);
 
         const {command, args} = getCommandFromList(commands, input.split(" "));
 
@@ -217,8 +238,16 @@
     * @param {any} event
     */
     function handleKeyDown(event) {
-        if (event.key === "ArrowUp") {
-            input = logs[logs.length - 1].text;
+    const index = logs.findIndex(l => l.user === log.user);
+
+    if (event.key === "ArrowUp") {
+            log = index > 0 ? logs[index - 1] : logs[logs.length - 1];
+            input = log.text;
+        }
+
+        if (event.key === "ArrowDown") {
+            log = index < logs.length - 1 ? logs[index + 1] : logs[0];
+            input = log.text;
         }
 
         dispatch('keydown', { key: event.key });
