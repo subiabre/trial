@@ -42,6 +42,7 @@
             ],
             "force": [
                 "Forces a digital memory to state one of their facts.",
+                "Use carefully! This is an experimental feature. Forcing a memory can have unforeseen consequences.",
                 "Use 'brief' to know some facts about the current digital memory.",
                 "Usage: force <fact>"
             ],
