@@ -1,11 +1,11 @@
 import type { Log } from "$lib/logs";
 import type { MemoryData } from "$lib/memory";
 
-const dialogBeginMarker = `The following is a conversation between`;
+const dialogBeginMarker = `The following is a`;
 
 function makePrompt(messages: Log[], options: PromptOptions) {
     return [
-        `${dialogBeginMarker} ${options.login} and ${options.memory.name}. They both are people.\n`,
+        `${dialogBeginMarker} conversation between ${options.login} and ${options.memory.name}. They both are people.\n`,
         `${options.memory.name} is ${options.memory.age} years old and is ${options.memory.traits}.\n\n`,
         ...messages
             .map((msg) => `${msg.user}: ${msg.text}\n`)
