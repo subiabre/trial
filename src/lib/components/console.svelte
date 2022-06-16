@@ -8,6 +8,7 @@
     // @ts-ignore
     import { createCommandList, getCommandFromList } from "$lib/commands";
     import { afterUpdate, beforeUpdate, createEventDispatcher, onMount } from "svelte";
+import { listen } from "svelte/internal";
 
     const dispatch = createEventDispatcher();
 
@@ -86,6 +87,8 @@
             help: messages.commands.login,
             action: async () => {
                 loggedin = true;
+                output = createLogs();
+                inputElement.disabled = true;
 
                 await new Promise((res) => setTimeout(res, 600));
 
@@ -100,6 +103,8 @@
                 messages.welcome.map((/** @type {string} */ msg) => {
                     output = updateLogs(output, '', msg);
                 });
+
+                inputElement.disabled = false;
             }
         },
         {
@@ -128,19 +133,11 @@
 
                 dialog = createLogs();
                 output = createLogs();
-                output = updateLogs(output, "", `Invited a new memory.`);
+                output = updateLogs(output, "", `A new memory has been loaded on the session.`);
 
-                output = updateLogs(
-                    output,
-                    "",
-                    `Name: ${memory.data.name}. Age: ${memory.data.age}.`
-                );
+                output = updateLogs(output, "", `Name: ${memory.data.name}. Age: ${memory.data.age}.`);
 
-                output = updateLogs(
-                    output,
-                    "",
-                    `Type 'say <message>' to talk to this memory.`
-                );
+                output = updateLogs(output, "", `Type 'say <message>' to talk to this memory.`);
             },
         },
         {
@@ -167,6 +164,19 @@
                     dialog = updateLogs(dialog, memory.data.name, msg);
                 });
             },
+        },
+        {
+            name: "bye",
+            help: messages.commands.bye,
+            action: () => {
+                if (!checkForLoggedIn()) return;
+                if (!checkForLoadedMemory()) return;
+
+                output = updateLogs(output, "", `${memory.data.name} was unloaded from the session.`);
+
+                memory = emptyMemory();
+                dialog = createLogs();
+            }
         },
         {
             name: "force",
@@ -209,11 +219,7 @@
                 if (!checkForLoadedMemory()) return;
 
                 output = createLogs();
-                output = updateLogs(
-                    output,
-                    "",
-                    `${memory.data.name} was removed from the repository.`
-                );
+                output = updateLogs(output,"", `${memory.data.name} was removed from the repository.`);
 
                 memory = emptyMemory();
                 dialog = createLogs();
@@ -224,6 +230,19 @@
             help: messages.commands.clear,
             action: () => (output = createLogs()),
         },
+        {
+            name: "exit",
+            help: messages.commands.exit,
+            action: () => {
+                memory = emptyMemory();
+                dialog = createLogs();
+                output = createLogs();
+                logs = createLogs();
+
+                login = "user";
+                loggedin = false;
+            }
+        }
     ]);
 
     beforeUpdate(() => {

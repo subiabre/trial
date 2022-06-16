@@ -27,6 +27,7 @@
                 "Usage: name <newname>"
             ],
             "invite": [
+                "Opposite of 'bye'.",
                 "Loads a digital memory in the current session. If you have an specific memory's code you can load that memory.",
                 "Usage: invite [code]"
             ],
@@ -34,10 +35,15 @@
                 "Sends a message to the current digital memory.",
                 "Usage: say <message>"
             ],
+            "bye": [
+                "Opposite of 'invite'.",
+                "Unloads the current memory from the session.",
+                "Usage: bye"
+            ],
             "force": [
                 "Forces a digital memory to state one of their facts.",
                 "Use carefully! This is an experimental feature. Forcing a memory can have unforeseen consequences.",
-                "Use 'brief' to know some facts about the current digital memory.",
+                "Use 'brief' to know some facts about the current memory without forcing.",
                 "Usage: force <fact>"
             ],
             "brief": [
@@ -51,6 +57,10 @@
             "clear": [
                 "Clears the shell of dialog.",
                 "Usage: clear"
+            ],
+            "exit": [
+                "Closes the remote connection with the AMALGAMATE Digital Memory Repository.",
+                "Usage: exit"
             ]
         }
     }
