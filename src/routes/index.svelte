@@ -2,9 +2,6 @@
     import Console from "$lib/components/console.svelte";
     import Sound from "$lib/components/sound.svelte";
 
-    /** @type {Console} */
-    let console;
-
     /** @type {Sound} */
     let sound;
     
@@ -13,12 +10,12 @@
     */
     function handleKeyDown(event) {
         sound.playSounds();
-        sound.playKey(event.key);
+        sound.playKey(event.detail.key);
     }
 </script>
 
 <div id="app">
-    <Console bind:this={console} on:keydown={handleKeyDown}/>
-    <Sound bind:this={sound} />    
+    <Sound bind:this={sound} />
+    <Console on:keydown={handleKeyDown}/>
 </div>
 

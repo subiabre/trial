@@ -1,8 +1,8 @@
 <script>
+    /** @type {HTMLAudioElement[]} */
+    let soundKeyboard = [];
     /** @type {HTMLAudioElement}*/
-    let sound;
-    let soundSource = "sound/keyboard1.ogg";
-
+    let soundSpacebar;
     /** @type {HTMLAudioElement}*/
     let soundBg;
     /** @type {HTMLAudioElement}*/
@@ -14,43 +14,42 @@
     * @param {string} key
     */
     export async function playKey(key) {
-        setSoundSource(key);
+        if (key === " ") {
+            soundSpacebar.play();
+            return;
+        }
 
-        await sound.load();
-        sound.play();
+        soundKeyboard.sort(() => 0.5 - Math.random())[0].play();
     }
 
     export async function playSounds() {
         if (!soundPlay) {
             soundPlay = true;
 
-            soundStart.load();
-            await soundStart.play();
+            soundStart.play();
             soundBg.play();
         }
     }
-
-    /**
-     * @param {string} key
-     */
-    function setSoundSource(key) {
-        if (key === "") {
-            soundSource = "sound/spacebar.ogg";
-            return;
-        }
-
-        let number = Math.floor(Math.random() * (4 - 1 + 1) + 1);
-        soundSource = `sound/keyboard${number}.ogg`;
-    }
-
 </script>
 
-<audio bind:this={sound}>
-    <source src={soundSource} type="audio/ogg">
+<audio bind:this={soundKeyboard[0]} >
+    <source src="sound/keyboard1.ogg" type="audio/ogg">
 </audio>
-<audio bind:this={soundBg} loop>
+<audio bind:this={soundKeyboard[1]} >
+    <source src="sound/keyboard2.ogg" type="audio/ogg">
+</audio>
+<audio bind:this={soundKeyboard[2]} >
+    <source src="sound/keyboard3.ogg" type="audio/ogg">
+</audio>
+<audio bind:this={soundKeyboard[3]} >
+    <source src="sound/keyboard4.ogg" type="audio/ogg">
+</audio>
+<audio bind:this={soundSpacebar} >
+    <source src="sound/spacebar1.ogg" type="audio/ogg">
+</audio>
+<audio bind:this={soundBg}  loop>
     <source src="sound/ambient.ogg" type="audio/ogg">
 </audio>
-<audio bind:this={soundStart}>
+<audio bind:this={soundStart} >
     <source src="sound/start.ogg" type="audio/ogg">
 </audio>
