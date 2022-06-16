@@ -46,13 +46,17 @@ async function makeCompletion(prompt: string, options: CompletionOptions) {
     return data;
 }
 
-function parseOpenAiCompletion(completion: any, stop: string[]) {
+function parseOpenAiCompletion(completion: any, name: string, stop: string[]) {
     const choice = completion.choices[0];
     const text = (choice.finish_reason === 'length') ? `${choice.text}...` : choice.text;
 
     return text
         .split(`\n`)
-        .map((msg: string) => msg.trim())
+        .map((msg: string) => {
+            return msg
+                .trim()
+                .replaceAll(new RegExp(`${name}:`, 'g'), '')
+        })
         .filter((msg: string) => {
             for (let index = 0; index < stop.length; index++) {
                 const end = stop[index];
@@ -70,7 +74,7 @@ export async function post(event: { request: { json: () => any } }) {
     const prompt = makePrompt(data.messages, data.options.prompt);
 
     const completion = await makeCompletion(prompt.join(), data.options.completion);
-    const answer = parseOpenAiCompletion(completion, data.options.completion.stop);
+    const answer = parseOpenAiCompletion(completion, data.options.prompt.memory.name, data.options.completion.stop);
 
     console.log(prompt);
     console.log(answer);
