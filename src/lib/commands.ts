@@ -1,6 +1,6 @@
 export interface Command {
     name: string,
-    help: string,
+    help: string[],
     action: (args: string[]) => void;
 }
 

@@ -1,0 +1,52 @@
+{
+    "messages": {
+        "welcome": [
+            "Welcome, Engineer.",
+            "We've detected signs of possible corruption in our Digital Memory Repository.",
+            "The memories to be checked have been loaded into this server. Please assess the damages and attempt to repair or remove them from the repository.",
+            "",
+            "Interview them and look for signs of inconsistent or strange dialog.",
+            "Keep in mind these are digital copies of actual people who once existed. They might have been preserved already damaged.",
+            "Be cautious with your dialog, don't reveal too much information about their new existence or that might corrupt them."
+        ],
+        "commands": {
+            "help": [
+                "Shows usage information about commands.",
+                "Usage: help <command>"
+            ],
+            "login": [
+                "Open a remote connection with the AMALGAMATE Digital Memory Repository.",
+                "Usage: login"
+            ],
+            "name": [
+                "Changes your conversational name. This is the name presented to memories when you talk with them.",
+                "Usage: name <newname>"
+            ],
+            "invite": [
+                "Loads a digital memory in the current session. If you have an specific memory's code you can load that memory.",
+                "Usage: invite [code]"
+            ],
+            "say": [
+                "Sends a message to the digital memory.",
+                "Usage: say <message>"
+            ],
+            "force": [
+                "Forces a digital memory to state one of their facts.",
+                "Use 'brief' to know some facts about the current digital memory.",
+                "Usage: force <fact>"
+            ],
+            "brief": [
+                "Obtain a list of basic data about the current digital memory.",
+                "Usage: brief"
+            ],
+            "remove": [
+                "Removes the current digital memory from the repository. This action is not reversible.",
+                "Usage: remove"
+            ],
+            "clear": [
+                "Clears the shell of dialog.",
+                "Usage: clear"
+            ]
+        }
+    }
+}

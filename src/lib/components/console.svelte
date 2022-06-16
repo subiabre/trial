@@ -1,5 +1,7 @@
 <script>
     // @ts-ignore
+    import { messages } from "$lib/data/messages";
+    // @ts-ignore
     import { createLogs, updateLogs } from "$lib/logs";
     // @ts-ignore
     import { emptyMemory, createMemory, sayToMemory } from "$lib/memory";
@@ -20,14 +22,14 @@
 
     let memory = emptyMemory();
 
-    let messages = createLogs();
+    let dialog = createLogs();
     let output = createLogs();
     let logs = createLogs();
 
     let commands = createCommandList([
         {
             name: "help",
-            help: "Shows help about commands.",
+            help: messages.commands.help,
             /** @param {string[]} args */
             action: (args) => {
                 if (args.length < 1) {
@@ -43,17 +45,20 @@
                 }
 
                 const command = getCommandFromList(commands, args[0]);
-                output = updateLogs(output, "", command.help);
+                command.help.map(msg => {
+                    output = updateLogs(output, '', msg)
+                });
             },
         },
         {
             name: "login",
-            help: "Open a remote connection with the AMALGAMATE Digital Memory Repository",
+            help: messages.commands.login,
             action: async () => {
                 loggedin = true;
 
                 await new Promise((res, rej) => setTimeout(res, 600));
 
+                login = "Engineer";
                 output = updateLogs(output, '', `System Shell for the AMALGAMATE Digital Memory Repository.`);
                 output = updateLogs(output, '', `Copyright AMALGAMATE INDUSTRIES. ALL RIGTHS RESERVED.`);
                 output = updateLogs(output, '', `Type 'help' for a list of commands.`);
@@ -61,16 +66,14 @@
 
                 await new Promise((res, rej) => setTimeout(res, 2250));
 
-                login = "Engineer";
-
-                output = updateLogs(output, '', `Welcome, Engineer. We've detected signs of possible corruption in some memories.`);
-                output = updateLogs(output, '', `You've been tasked with investigating them. The possibly corrupted memories have been loaded into this machine.`);
-                output = updateLogs(output, '', `Interview the memories to assess if they have corruption and use every tool you've been given carefully to repair or remove the damaged instances.`);
+                messages.welcome.map((/** @type {string} */ msg) => {
+                    output = updateLogs(output, '', msg);
+                });
             }
         },
         {
             name: "name",
-            help: "Changes your conversational name. This is the name memories will read about you.",
+            help: messages.commands.name,
             /** @param {string[]} args */
             action: (args) => {
                 if (!checkForLoggedIn()) return;
@@ -81,7 +84,7 @@
         },
         {
             name: "invite",
-            help: "Loads a new digital memory into the shell.",
+            help: messages.commands.invite,
             /** @param {string[]} args*/
             action: async (args) => {
                 if (!checkForLoggedIn()) return;
@@ -106,28 +109,28 @@
         },
         {
             name: "say",
-            help: "Sends a message to the digital memory.",
+            help: messages.commands.say,
             /** @param {string[]} args */
             action: async (args) => {
                 if (!checkForLoggedIn()) return;
                 if (!checkForLoadedMemory()) return;
 
-                messages = updateLogs(messages, login, args.join(" "));
+                dialog = updateLogs(dialog, login, args.join(" "));
 
-                let res = await sayToMemory(messages, { 
+                let res = await sayToMemory(dialog, { 
                     prompt: { memory: memory.data, login },
                     completion: { stop: [`${login}:`], temperature: memory.data.temperature } 
                 });
 
                 res.map((/** @type {string} */ msg) => {
                     output = updateLogs(output, memory.data.name, msg);
-                    messages = updateLogs(messages, memory.data.name, msg);
+                    dialog = updateLogs(dialog, memory.data.name, msg);
                 });
             },
         },
         {
             name: "force",
-            help: "Use it to get a digital memory to state on of their facts. 'force <fact>'",
+            help: messages.commands.force,
             /** @param {string[]} args */
             action: (args) => {
                 if (!checkForLoggedIn()) return;
@@ -137,12 +140,12 @@
                 let text = args[0] === 'traits' ? `My traits are ${memory.data.traits}` : `My ${args[0]} is ${memory.data[args[0]]}`;
                 
                 output = updateLogs(output, memory.data.name, text);
-                messages = updateLogs(messages, memory.data.name, text);
+                dialog = updateLogs(dialog, memory.data.name, text);
             }
         },
         {
             name: "brief",
-            help: "Get a brief on the personality of the digital memory",
+            help: messages.commands.brief,
             /** @param {string[]} args */
             action: (args) => {
                 if (!checkForLoggedIn()) return;
@@ -156,7 +159,7 @@
         },
         {
             name: "remove",
-            help: "Removes the currently loaded digital memory from the repository. This action is not reversible.",
+            help: messages.commands.remove,
             action: () => {
                 if (!checkForLoggedIn()) return;
                 if (!checkForLoadedMemory()) return;
@@ -169,17 +172,17 @@
                 );
 
                 memory = emptyMemory();
-                messages = createLogs();
+                dialog = createLogs();
             },
         },
         {
             name: "clear",
-            help: "Clears the shell of messages.",
+            help: messages.commands.clear,
             action: () => (output = createLogs()),
         },
         {
             name: "",
-            help: "",
+            help: [],
             /** @param {string[]} args */
             action: (args) => (output = updateLogs(output, "", `${args[0]} is not a valid command.`)),
         },
