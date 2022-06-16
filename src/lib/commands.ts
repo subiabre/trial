@@ -6,20 +6,19 @@ export interface Command {
 
 /**
  * @param {Command[]} list
- * @param {string} name
- * @returns {Command}
+ * @param {string[]} args
+ * @returns {{ Command, string[] }}
  */
-export function getCommandFromList(list: Command[], name: string) {
+export function getCommandFromList(list: Command[], args: string[]) {
     for (let index = 0; index < list.length; index++) {
         const command = list[index];
-        const match = new RegExp(command.name);
         
-        if (match.test(name.toLowerCase())) {
-            return command;
+        if (command.name === args[0].toLowerCase()) {
+            return { command, args: args.slice(1) };
         }
     }
 
-    return list[0];
+    return { command: list[0], args };
 }
 
 export function createCommandList(list: Command[]) {

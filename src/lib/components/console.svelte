@@ -28,6 +28,12 @@
 
     let commands = createCommandList([
         {
+            name: "",
+            help: [],
+            /** @param {string[]} args */
+            action: (args) => (output = updateLogs(output, "", `${args[0]} is not a valid command.`)),
+        },
+        {
             name: "help",
             help: messages.commands.help,
             /** @param {string[]} args */
@@ -44,7 +50,7 @@
                     return;
                 }
 
-                const command = getCommandFromList(commands, args[0]);
+                const {command} = getCommandFromList(commands, args);
                 command.help.map(msg => {
                     output = updateLogs(output, '', msg)
                 });
@@ -180,12 +186,6 @@
             help: messages.commands.clear,
             action: () => (output = createLogs()),
         },
-        {
-            name: "",
-            help: [],
-            /** @param {string[]} args */
-            action: (args) => (output = updateLogs(output, "", `${args[0]} is not a valid command.`)),
-        },
     ]);
 
     beforeUpdate(() => {
@@ -206,10 +206,9 @@
         output = updateLogs(output, login, input);
         logs = updateLogs(logs, '', input);
 
-        let args = input.split(" ");
-        let command = getCommandFromList(commands, args[0]);
+        const {command, args} = getCommandFromList(commands, input.split(" "));
 
-        command.action(args.slice(1));
+        command.action(args);
 
         input = "";
     }
