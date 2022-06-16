@@ -8,14 +8,21 @@
     /**
     * @param {any} event
     */
-    function handleKeyDown(event) {
+    function handleMouseUp(event) {
         sound.playSounds();
+    }
+
+    /**
+    * @param {any} event
+    */
+    function handleKeyDown(event) {
         sound.playKey(event.detail.key);
+        sound.playSounds();
     }
 </script>
 
 <div id="app">
     <Sound bind:this={sound} />
-    <Console on:keydown={handleKeyDown}/>
+    <Console on:mouseup={handleMouseUp} on:keydown={handleKeyDown}/>
 </div>
 

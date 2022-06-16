@@ -7,7 +7,7 @@
     import { emptyMemory, createMemory, sayToMemory } from "$lib/memory";
     // @ts-ignore
     import { createCommandList, getCommandFromList } from "$lib/commands";
-    import { afterUpdate, beforeUpdate, createEventDispatcher } from "svelte";
+    import { afterUpdate, beforeUpdate, createEventDispatcher, onMount } from "svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -17,6 +17,11 @@
     let autoscroll;
 
     let input = "";
+    /** @type {HTMLInputElement} */
+    let inputElement;
+    /** @type {Selection|null} */
+    let selection;
+
     let login = "user";
     let loggedin = false;
 
@@ -218,6 +223,23 @@
         if (autoscroll) div.scrollTo(0, div.scrollHeight);
     });
 
+    onMount(() => {
+        document.addEventListener('selectionchange', () => {
+            selection = document.getSelection();
+        });
+    });
+
+    /**
+     * @param {Event} event
+     */
+    function handleMouseUp(event) {
+        if (!selection?.toString()) {
+            inputElement.focus();
+        }
+
+        dispatch('mouseup', { selection: selection })
+    }
+
     /**
      * @param {Event} event
      */
@@ -238,9 +260,9 @@
     * @param {any} event
     */
     function handleKeyDown(event) {
-    const index = logs.findIndex(l => l.user === log.user);
+        const index = logs.findIndex(l => l.user === log.user);
 
-    if (event.key === "ArrowUp") {
+        if (event.key === "ArrowUp") {
             log = index > 0 ? logs[index - 1] : logs[logs.length - 1];
             input = log.text;
         }
@@ -277,7 +299,7 @@
     }
 </script>
 
-<div id="console" bind:this={div}>
+<div id="console" bind:this={div} on:mouseup={handleMouseUp}>
     {#each output as msg}
         <p class="cli">
             {#if msg.user !== ""}
@@ -292,6 +314,7 @@
             autofocus
             name="input"
             on:keydown={handleKeyDown}
+            bind:this={inputElement}
             bind:value={input}
         />
     </form>
