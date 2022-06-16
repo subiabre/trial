@@ -10,19 +10,13 @@
             "Be cautious with your dialog, don't reveal too much information about their new existence or that might corrupt them."
         ],
         "commands": {
-            "empty": [
-                "Congratulations, you've discovered the '' (empty string) command.",
-                "This command is triggered everytime you input a string that does not start with a valid command to let you know whatever you typed is not a command.",
-                "Override it with 'default' to trigger a different command instead of this one. You probably want to set 'say' as your default to make conversating with memories easier.",
-                "Happy hacking."
-            ],
             "help": [
                 "Shows usage information about commands.",
-                "Usage: help <command>"
+                "Usage: help [command]"
             ],
             "default": [
-                "Set the default shell command.",
-                "Usage: default <command>"
+                "Set the default shell command. Use it with no command name to reset.",
+                "Usage: default [command]"
             ],
             "login": [
                 "Open a remote connection with the AMALGAMATE Digital Memory Repository.",

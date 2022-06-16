@@ -67,7 +67,7 @@
                     return;
                 }
 
-                const {command} = getCommandFromList(commands, args);
+                const {command} = getCommandFromList(commands.slice(1), args);
                 command.help.map(msg => {
                     output = updateLogs(output, '', msg)
                 });
@@ -78,7 +78,7 @@
             help: messages.commands.default,
             /** @param {string[]} args */
             action: (args) => {
-                defaultCommand = args[0];
+                defaultCommand = args[0] ?? "";
             }
         },
         {
@@ -108,6 +108,10 @@
             /** @param {string[]} args */
             action: (args) => {
                 if (!checkForLoggedIn()) return;
+                if (args.length < 1) {
+                    output = updateLogs(output, '', `You must provide a <name> argument.`);
+                    return;
+                }
 
                 login = args[0];
                 output = updateLogs(output, "", `Name set to ${login}`);
@@ -146,6 +150,10 @@
             action: async (args) => {
                 if (!checkForLoggedIn()) return;
                 if (!checkForLoadedMemory()) return;
+                if (args.length < 1) {
+                    output = updateLogs(output, '', `You must provide a <message> argument.`)
+                    return;
+                }
 
                 dialog = updateLogs(dialog, login, args.join(" "));
 
@@ -167,6 +175,10 @@
             action: (args) => {
                 if (!checkForLoggedIn()) return;
                 if (!checkForLoadedMemory()) return;
+                if (args.length < 1) {
+                    output = updateLogs(output, '', `You must provide a <fact> argument.`);
+                    return;
+                }
 
                 // @ts-ignore
                 let text = args[0] === 'traits' ? `My traits are ${memory.data.traits}` : `My ${args[0]} is ${memory.data[args[0]]}`;
