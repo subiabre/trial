@@ -1,21 +1,11 @@
 import type { Log } from "$lib/logs";
 import type { MemoryData } from "$lib/memory";
 
-export interface CompletionOptions {
-    max?: number,
-    stop?: [string],
-    temperature?: number,
-    frequency_penalty?: number
-}
-
-export interface PromptOptions {
-    memory: MemoryData,
-    login: string
-}
+const dialogBeginMarker = `The following is a conversation between`;
 
 function makePrompt(messages: Log[], options: PromptOptions) {
     return [
-        `The following is a conversation between ${options.login} and ${options.memory.name}. They both are people.\n`,
+        `${dialogBeginMarker} ${options.login} and ${options.memory.name}. They both are people.\n`,
         `${options.memory.name} is ${options.memory.age} years old and is ${options.memory.traits}.\n\n`,
         ...messages
             .map((msg) => `${msg.user}: ${msg.text}\n`)
@@ -34,7 +24,7 @@ async function makeCompletion(prompt: string, options: CompletionOptions) {
         body: JSON.stringify({
             "prompt": prompt,
             "max_tokens": options.max ?? 128,
-            "stop": options.stop ?? '',
+            "stop": [...options.stop ?? [], dialogBeginMarker],
             "temperature": options.temperature ?? 0.7,
             "frequency_penalty": options.frequency_penalty ?? 0.2,
             "logit_bias": {"50256": -100,"198":  0.5},
@@ -56,6 +46,7 @@ function parseOpenAiCompletion(completion: any, name: string, stop: string[]) {
             return msg
                 .trim()
                 .replaceAll(new RegExp(`${name}:`, 'g'), '')
+                .replaceAll(new RegExp(dialogBeginMarker, 'g'), '')
         })
         .filter((msg: string) => {
             for (let index = 0; index < stop.length; index++) {
@@ -66,6 +57,18 @@ function parseOpenAiCompletion(completion: any, name: string, stop: string[]) {
 
             return true;
         });
+}
+
+export interface CompletionOptions {
+    max?: number,
+    stop?: string[],
+    temperature?: number,
+    frequency_penalty?: number
+}
+
+export interface PromptOptions {
+    memory: MemoryData,
+    login: string
 }
 
 /** @type {import('./__types/makeCompletion').RequestHandler} */
