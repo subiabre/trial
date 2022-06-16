@@ -350,8 +350,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         pointer-events: none;
         background: repeating-linear-gradient(
             0deg,
@@ -365,6 +365,7 @@
     #console * {
         margin: 0;
         font-family: 'VT323', monospace;
+        font-size: 1.24rem;
     }
 
     #console p.cli {
@@ -382,7 +383,6 @@
     #console .cli input {
         width: calc(100% - 11rem);
         padding: 0;
-        font-size: 1rem;
         color: var(--font-color-main);
         border: none;
         outline: none;
